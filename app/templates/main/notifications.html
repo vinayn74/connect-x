@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Notifications — Connect-X{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Notifications</h1>
+</div>
+{% if notifications %}
+    {% for notif in notifications %}
+    <div class="notif-item {{ 'unread' if not notif.is_read }}">
+        <div class="notif-icon {{ notif.action }}">
+            {% if notif.action == 'like' %}❤️
+            {% elif notif.action == 'comment' %}💬
+            {% elif notif.action == 'follow' %}👤
+            {% elif notif.action == 'repost' %}🔁
+            {% endif %}
+        </div>
+        <img src="{% if notif.actor.avatar_url == 'default-avatar.png' %}{{ url_for('static', filename='images/default-avatar.png') }}{% else %}{{ url_for('static', filename='images/uploads/' + notif.actor.avatar_url) }}{% endif %}" alt="">
+        <div class="text">
+            <strong>
+                <a href="{{ url_for('profile.view_profile', username=notif.actor.username) }}">{{ notif.actor.display_name }}</a>
+            </strong>
+            {% if notif.action == 'like' %} liked your post
+            {% elif notif.action == 'comment' %} commented on your post
+            {% elif notif.action == 'follow' %} started following you
+            {% elif notif.action == 'repost' %} reposted your post
+            {% endif %}
+            <div class="time">{{ notif.created_at.strftime('%b %d, %Y at %I:%M %p') }}</div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="empty-state">
+        <div class="icon">🔔</div>
+        <h3>No notifications yet</h3>
+        <p>When someone interacts with your posts, you'll see it here.</p>
+    </div>
+{% endif %}
+{% endblock %}

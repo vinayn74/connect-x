@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — @{{ user.username }} — Connect-X{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>{{ title }}</h1>
+    <p>@{{ user.username }}</p>
+</div>
+
+{% if followers %}
+    {% for person in followers %}
+    <div class="user-list-item">
+        <a href="{{ url_for('profile.view_profile', username=person.username) }}">
+            <img src="{% if person.avatar_url == 'default-avatar.png' %}{{ url_for('static', filename='images/default-avatar.png') }}{% else %}{{ url_for('static', filename='images/uploads/' + person.avatar_url) }}{% endif %}" alt="">
+        </a>
+        <div class="info">
+            <a href="{{ url_for('profile.view_profile', username=person.username) }}">
+                <div class="name">{{ person.display_name }}{% if person.is_verified %} <span style="color:var(--accent);">✓</span>{% endif %}</div>
+            </a>
+            <div class="handle">@{{ person.username }}</div>
+            {% if person.bio %}<div class="bio">{{ person.bio[:120] }}</div>{% endif %}
+        </div>
+        {% if person.id != current_user.id %}
+        <form method="POST" action="{{ url_for('profile.follow', username=person.username) }}">
+            <button class="btn {{ 'btn-outline' if current_user.is_following(person) else 'btn-primary' }} btn-sm">
+                {{ 'Following' if current_user.is_following(person) else 'Follow' }}
+            </button>
+        </form>
+        {% endif %}
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="empty-state">
+        <div class="icon">👥</div>
+        <h3>No {{ title.lower() }} yet</h3>
+        <p>When people {{ 'follow' if title == 'Followers' else 'are followed by' }} @{{ user.username }}, they'll show up here.</p>
+    </div>
+{% endif %}
+{% endblock %}

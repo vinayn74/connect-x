@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Login — Connect-X{% endblock %}
+{% block public_content %}
+<div class="auth-container">
+    <div class="auth-bg-orb orb1"></div>
+    <div class="auth-bg-orb orb2"></div>
+    <div class="auth-card">
+        <div class="logo">Connect<span>-X</span></div>
+        <h2>Welcome back</h2>
+        <p class="subtitle">Sign in to your account</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            <div class="form-group">
+                <label for="login_id">Username or Email</label>
+                <input type="text" id="login_id" name="login_id" class="form-control" placeholder="Enter username or email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
+            </div>
+            <div class="form-group" style="display:flex;align-items:center;gap:8px;">
+                <input type="checkbox" id="remember" name="remember" style="accent-color:var(--accent);">
+                <label for="remember" style="margin:0;cursor:pointer;">Remember me</label>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+        </form>
+        <p class="form-footer">
+            Don't have an account? <a href="{{ url_for('auth.register') }}">Create one</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

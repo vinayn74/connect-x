@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Messages — Connect-X{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Messages</h1>
+</div>
+
+{% if conversations %}
+    <div class="conversation-list">
+        {% for user in conversations %}
+        <a href="{{ url_for('messages.chat', username=user.username) }}" class="conversation-item">
+            <img src="{% if user.avatar_url == 'default-avatar.png' %}{{ url_for('static', filename='images/default-avatar.png') }}{% else %}{{ url_for('static', filename='images/uploads/' + user.avatar_url) }}{% endif %}" alt="">
+            <div class="info">
+                <div class="name-row">
+                    <span class="name">{{ user.display_name }}</span>
+                    <span class="handle">@{{ user.username }}</span>
+                </div>
+                <div class="last-message">
+                    {% set last_msg = current_user.last_message_with(user) %}
+                    {% if last_msg %}
+                        {{ last_msg.content[:50] }}{{ '...' if last_msg.content|length > 50 else '' }}
+                    {% endif %}
+                </div>
+            </div>
+            {% set unread_count = current_user.unread_messages_from(user) %}
+            {% if unread_count > 0 %}
+            <div class="unread-badge">{{ unread_count }}</div>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <div class="icon">✉️</div>
+        <h3>No messages yet</h3>
+        <p>Start a conversation with someone from their profile!</p>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% from "posts/post_card.html" import render_post with context %}
+{% block title %}Search — Connect-X{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Search</h1>
+</div>
+<div style="padding:16px 20px;">
+    <form action="{{ url_for('main.search') }}" method="GET" class="search-box" style="margin-bottom:0;">
+        <span class="icon">🔍</span>
+        <input type="text" name="q" placeholder="Search users or posts..." value="{{ query }}" autofocus>
+        <input type="hidden" name="tab" value="{{ tab }}">
+    </form>
+</div>
+<div class="tabs">
+    <a href="{{ url_for('main.search', q=query, tab='users') }}" class="tab-link {{ 'active' if tab == 'users' }}">People</a>
+    <a href="{{ url_for('main.search', q=query, tab='posts') }}" class="tab-link {{ 'active' if tab == 'posts' }}">Posts</a>
+</div>
+
+{% if query %}
+    {% if tab == 'users' %}
+        {% if users %}
+            {% for user in users %}
+            <div class="user-list-item">
+                <a href="{{ url_for('profile.view_profile', username=user.username) }}">
+                    <img src="{% if user.avatar_url == 'default-avatar.png' %}{{ url_for('static', filename='images/default-avatar.png') }}{% else %}{{ url_for('static', filename='images/uploads/' + user.avatar_url) }}{% endif %}" alt="">
+                </a>
+                <div class="info">
+                    <a href="{{ url_for('profile.view_profile', username=user.username) }}"><div class="name">{{ user.display_name }}</div></a>
+                    <div class="handle">@{{ user.username }}</div>
+                    {% if user.bio %}<div class="bio">{{ user.bio[:100] }}</div>{% endif %}
+                </div>
+                {% if user.id != current_user.id %}
+                <form method="POST" action="{{ url_for('profile.follow', username=user.username) }}">
+                    <button class="btn {{ 'btn-outline' if current_user.is_following(user) else 'btn-primary' }} btn-sm">
+                        {{ 'Following' if current_user.is_following(user) else 'Follow' }}
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state"><div class="icon">👤</div><h3>No users found</h3><p>Try a different search term.</p></div>
+        {% endif %}
+    {% else %}
+        {% if posts %}
+            {% for post in posts %}{{ render_post(post) }}{% endfor %}
+        {% else %}
+            <div class="empty-state"><div class="icon">📝</div><h3>No posts found</h3><p>Try a different search term.</p></div>
+        {% endif %}
+    {% endif %}
+{% else %}
+    <div class="empty-state"><div class="icon">🔍</div><h3>Search Connect-X</h3><p>Find people and posts.</p></div>
+{% endif %}
+{% endblock %}

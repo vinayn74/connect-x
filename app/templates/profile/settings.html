@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Settings — Connect-X{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Edit Profile</h1>
+</div>
+<div class="settings-form">
+    <form method="POST" action="{{ url_for('profile.settings') }}" enctype="multipart/form-data">
+        <!-- Avatar -->
+        <div class="avatar-upload">
+            <img src="{% if current_user.avatar_url == 'default-avatar.png' %}{{ url_for('static', filename='images/default-avatar.png') }}{% else %}{{ url_for('static', filename='images/uploads/' + current_user.avatar_url) }}{% endif %}" alt="Avatar" id="avatar-preview">
+            <div>
+                <label for="avatar">Change avatar</label>
+                <input type="file" id="avatar" name="avatar" accept="image/*" onchange="document.getElementById('avatar-preview').src=URL.createObjectURL(this.files[0])">
+                <p style="font-size:0.75rem;color:var(--text-muted);margin-top:6px;">JPG, PNG or GIF. Max 16MB.</p>
+            </div>
+        </div>
+
+        <!-- Display Name -->
+        <div class="form-group">
+            <label for="display_name">Display Name</label>
+            <input type="text" id="display_name" name="display_name" class="form-control" value="{{ current_user.display_name or '' }}" placeholder="Your name">
+        </div>
+
+        <!-- Bio -->
+        <div class="form-group">
+            <label for="bio">Bio</label>
+            <textarea id="bio" name="bio" class="form-control" placeholder="Tell the world about yourself" rows="3">{{ current_user.bio or '' }}</textarea>
+        </div>
+
+        <!-- Location -->
+        <div class="form-group">
+            <label for="location">Location</label>
+            <input type="text" id="location" name="location" class="form-control" value="{{ current_user.location or '' }}" placeholder="Where are you based?">
+        </div>
+
+        <!-- Website -->
+        <div class="form-group">
+            <label for="website">Website</label>
+            <input type="url" id="website" name="website" class="form-control" value="{{ current_user.website or '' }}" placeholder="https://yourwebsite.com">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full">Save Changes</button>
+    </form>
+</div>
+{% endblock %}

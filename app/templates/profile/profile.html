@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% from "posts/post_card.html" import render_post with context %}
+{% block title %}{{ user.display_name }} (@{{ user.username }}) — Connect-X{% endblock %}
+{% block content %}
+<!-- Cover -->
+<div class="profile-cover"></div>
+
+<!-- Profile Info -->
+<div class="profile-header-info">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div class="profile-avatar-wrap">
+            <img class="profile-avatar"
+                 src="{% if user.avatar_url == 'default-avatar.png' %}{{ url_for('static', filename='images/default-avatar.png') }}{% else %}{{ url_for('static', filename='images/uploads/' + user.avatar_url) }}{% endif %}"
+                 alt="{{ user.display_name }}">
+        </div>
+        <div class="profile-actions">
+            {% if user.id == current_user.id %}
+                <a href="{{ url_for('profile.settings') }}" class="btn btn-outline btn-sm">Edit profile</a>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-sm">Logout</a>
+            {% else %}
+                <form method="POST" action="{{ url_for('profile.follow', username=user.username) }}" style="display:inline;">
+                    <button type="submit" class="btn {{ 'btn-outline' if current_user.is_following(user) else 'btn-primary' }} btn-sm follow-btn" data-username="{{ user.username }}">
+                        {{ 'Following' if current_user.is_following(user) else 'Follow' }}
+                    </button>
+                </form>
+                <a href="{{ url_for('messages.chat', username=user.username) }}" class="btn btn-outline btn-sm">Message</a>
+{% endif %}
+        </div>
+    </div>
+
+    <h2 class="profile-name">
+        {{ user.display_name }}
+        {% if user.is_verified %}<span style="color:var(--accent);font-size:0.9rem;">✓</span>{% endif %}
+    </h2>
+    <div class="profile-handle">@{{ user.username }}</div>
+
+    {% if user.bio %}
+    <p class="profile-bio">{{ user.bio }}</p>
+    {% endif %}
+
+    <div class="profile-meta">
+        {% if user.location %}<span>📍 {{ user.location }}</span>{% endif %}
+        {% if user.website %}<span>🔗 <a href="{{ user.website }}" target="_blank">{{ user.website }}</a></span>{% endif %}
+        <span>📅 Joined {{ user.created_at.strftime('%B %Y') }}</span>
+    </div>
+
+    <div class="profile-stats">
+        <a href="{{ url_for('profile.following', username=user.username) }}">
+            <span class="count">{{ user.following_count }}</span>
+            <span class="label">Following</span>
+        </a>
+        <a href="{{ url_for('profile.followers', username=user.username) }}">
+            <span class="count followers-count">{{ user.followers_count }}</span>
+            <span class="label">Followers</span>
+        </a>
+    </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+    <a href="{{ url_for('profile.view_profile', username=user.username, tab='posts') }}" class="tab-link {{ 'active' if tab == 'posts' }}">Posts</a>
+    <a href="{{ url_for('profile.view_profile', username=user.username, tab='likes') }}" class="tab-link {{ 'active' if tab == 'likes' }}">Likes</a>
+    <a href="{{ url_for('profile.view_profile', username=user.username, tab='media') }}" class="tab-link {{ 'active' if tab == 'media' }}">Media</a>
+</div>
+
+<!-- Posts -->
+{% if posts.items %}
+    {% for post in posts.items %}
+        {{ render_post(post) }}
+    {% endfor %}
+    {% if posts.has_next %}
+    <div style="padding:20px;text-align:center;">
+        <a href="{{ url_for('profile.view_profile', username=user.username, tab=tab, page=posts.next_num) }}" class="btn btn-outline">Load more</a>
+    </div>
+    {% endif %}
+{% else %}
+    <div class="empty-state">
+        <div class="icon">📝</div>
+        <h3>No {{ tab }} yet</h3>
+        <p>{% if user.id == current_user.id %}Your {{ tab }} will appear here.{% else %}@{{ user.username }} hasn't posted {{ tab }} yet.{% endif %}</p>
+    </div>
+{% endif %}
+{% endblock %}

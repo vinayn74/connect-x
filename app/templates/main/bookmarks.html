@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "posts/post_card.html" import render_post with context %}
+{% block title %}Bookmarks — Connect-X{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Bookmarks</h1>
+    <p>@{{ current_user.username }}</p>
+</div>
+{% if posts.items %}
+    {% for post in posts.items %}
+        {{ render_post(post) }}
+    {% endfor %}
+    {% if posts.has_next %}
+    <div style="padding:20px;text-align:center;">
+        <a href="{{ url_for('main.bookmarks_page', page=posts.next_num) }}" class="btn btn-outline">Load more</a>
+    </div>
+    {% endif %}
+{% else %}
+    <div class="empty-state">
+        <div class="icon">🔖</div>
+        <h3>No bookmarks yet</h3>
+        <p>Save posts to read later by tapping the bookmark icon.</p>
+    </div>
+{% endif %}
+{% endblock %}

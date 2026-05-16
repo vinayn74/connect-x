@@ -1,0 +1,60 @@
+<!-- Reusable post card macro -->
+{% macro render_post(post) %}
+<article class="post-card" id="post-{{ post.id }}">
+    {% if post.is_repost %}
+    <div class="repost-label">🔁 {{ post.author.display_name }} reposted</div>
+    {% endif %}
+    <div class="post-header">
+        <a href="{{ url_for('profile.view_profile', username=post.author.username) }}">
+            <img class="post-avatar"
+                 src="{% if post.author.avatar_url == 'default-avatar.png' %}{{ url_for('static', filename='images/default-avatar.png') }}{% else %}{{ url_for('static', filename='images/uploads/' + post.author.avatar_url) }}{% endif %}"
+                 alt="{{ post.author.display_name }}">
+        </a>
+        <div class="post-meta">
+            <div class="post-author">
+                <a href="{{ url_for('profile.view_profile', username=post.author.username) }}">
+                    <span class="name">{{ post.author.display_name }}</span>
+                </a>
+                {% if post.author.is_verified %}<span class="verified">✓</span>{% endif %}
+                <span class="handle">@{{ post.author.username }}</span>
+                <span class="dot">·</span>
+                <span class="time">{{ post.created_at.strftime('%b %d') }}</span>
+            </div>
+        </div>
+        {% if post.user_id == current_user.id %}
+        <button onclick="deletePost({{ post.id }})" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.1rem;padding:4px 8px;" title="Delete">🗑️</button>
+        {% endif %}
+    </div>
+    <div class="post-content">{{ post.content }}</div>
+    {% if post.image_url %}
+    <div class="post-image">
+        <img src="{{ url_for('static', filename='images/uploads/' + post.image_url) }}" alt="Post image" loading="lazy">
+    </div>
+    {% endif %}
+    <div class="post-actions">
+        <button class="post-action comment-btn" data-post-id="{{ post.id }}">
+            <span class="icon">💬</span>
+            <span class="count">{{ post.comments_count if post.comments_count > 0 else '' }}</span>
+        </button>
+        <button class="post-action repost-btn" data-post-id="{{ post.id }}">
+            <span class="icon">🔁</span>
+            <span class="count">{{ post.reposts_count if post.reposts_count > 0 else '' }}</span>
+        </button>
+        <button class="post-action like-btn {{ 'liked' if current_user.has_liked(post) }}" data-post-id="{{ post.id }}">
+            <span class="icon">{{ '❤️' if current_user.has_liked(post) else '🤍' }}</span>
+            <span class="count">{{ post.likes_count if post.likes_count > 0 else '' }}</span>
+        </button>
+        <button class="post-action bookmark-btn {{ 'bookmarked' if current_user.has_bookmarked(post) }}" data-post-id="{{ post.id }}">
+            <span class="icon">{{ '🔖' if current_user.has_bookmarked(post) else '🏷️' }}</span>
+        </button>
+    </div>
+    <!-- Comments Section -->
+    <div class="comments-section" data-post-id="{{ post.id }}">
+        <div class="comments-list"></div>
+        <form class="comment-form" data-post-id="{{ post.id }}">
+            <input type="text" placeholder="Write a reply..." autocomplete="off">
+            <button type="submit" class="btn btn-primary btn-sm">Reply</button>
+        </form>
+    </div>
+</article>
+{% endmacro %}

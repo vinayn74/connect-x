@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Chat with {{ other_user.display_name }} — Connect-X{% endblock %}
+{% block content %}
+<div class="chat-header">
+    <a href="{{ url_for('messages.index') }}" class="back-btn">←</a>
+    <img src="{% if other_user.avatar_url == 'default-avatar.png' %}{{ url_for('static', filename='images/default-avatar.png') }}{% else %}{{ url_for('static', filename='images/uploads/' + other_user.avatar_url) }}{% endif %}" alt="">
+    <div class="info">
+        <div class="name">{{ other_user.display_name }}</div>
+        <div class="handle">@{{ other_user.username }}</div>
+    </div>
+</div>
+
+<div class="chat-messages" id="chat-messages">
+    {% for msg in messages %}
+    <div class="message {{ 'mine' if msg.sender_id == current_user.id else 'theirs' }}">
+        <div class="bubble">
+            {{ msg.content }}
+            <div class="time">{{ msg.created_at.strftime('%I:%M %p') }}</div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="chat-input-area">
+    <form id="chat-form">
+        <input type="hidden" id="receiver-id" value="{{ other_user.id }}">
+        <textarea id="message-input" placeholder="Start a new message" rows="1" required></textarea>
+        <button type="submit" class="send-btn" id="send-btn">
+            <span>➤</span>
+        </button>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const messageInput = document.getElementById('message-input');
+    const receiverId = document.getElementById('receiver-id').value;
+
+    // Scroll to bottom
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Auto-expand textarea
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+
+    chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const content = messageInput.value.trim();
+        if (!content) return;
+
+        fetch('/api/messages/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                receiver_id: receiverId,
+                content: content
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const msg = data.message;
+                const msgHtml = `
+                    <div class="message mine">
+                        <div class="bubble">
+                            ${msg.content}
+                            <div class="time">${msg.created_at}</div>
+                        </div>
+                    </div>
+                `;
+                chatMessages.insertAdjacentHTML('beforeend', msgHtml);
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        });
+    });
+
+    // Simple polling for new messages every 5 seconds
+    setInterval(function() {
+        // This is a simple implementation. In a real app, you'd use Socket.io or check for new IDs.
+        // For now, we just refresh if there are new messages detected.
+        // (Optional: Implement a proper message fetching API)
+    }, 5000);
+});
+</script>
+{% endblock %}

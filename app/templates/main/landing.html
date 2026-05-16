@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Connect-X — Where Conversations Happen{% endblock %}
+{% block public_content %}
+<div class="landing">
+    <div class="landing-left">
+        <div class="icon-big">✦</div>
+        <div class="landing-left-content">
+            <h1>Happening now</h1>
+            <p>Join the conversation. Share ideas, connect with people, and explore what's trending.</p>
+        </div>
+    </div>
+    <div class="landing-right">
+        <div class="landing-actions">
+            <div class="logo">Connect<span>-X</span></div>
+            <h2>Join today.</h2>
+            <p>See what's happening in the world right now.</p>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-full" style="font-size:1.05rem;padding:14px;">Create Account</a>
+            <div style="text-align:center;color:var(--text-muted);font-size:0.85rem;">or</div>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline btn-full" style="font-size:1.05rem;padding:14px;">Sign In</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

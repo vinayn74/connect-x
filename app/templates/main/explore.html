@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% from "posts/post_card.html" import render_post with context %}
+{% block title %}Explore — Connect-X{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Explore</h1>
+    <p>Discover new posts and people</p>
+</div>
+
+{% if suggested_users %}
+<div style="padding:16px 20px;border-bottom:1px solid var(--border);">
+    <h3 style="font-size:1rem;font-weight:700;margin-bottom:12px;">Who to follow</h3>
+    {% for user in suggested_users %}
+    <div class="widget-user">
+        <a href="{{ url_for('profile.view_profile', username=user.username) }}">
+            <img src="{% if user.avatar_url == 'default-avatar.png' %}{{ url_for('static', filename='images/default-avatar.png') }}{% else %}{{ url_for('static', filename='images/uploads/' + user.avatar_url) }}{% endif %}" alt="">
+        </a>
+        <div class="info">
+            <a href="{{ url_for('profile.view_profile', username=user.username) }}">
+                <div class="name">{{ user.display_name }}</div>
+            </a>
+            <div class="handle">@{{ user.username }}</div>
+        </div>
+        {% if not current_user.is_following(user) %}
+        <form method="POST" action="{{ url_for('profile.follow', username=user.username) }}">
+            <button type="submit" class="btn btn-primary btn-sm">Follow</button>
+        </form>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if posts.items %}
+    {% for post in posts.items %}
+        {{ render_post(post) }}
+    {% endfor %}
+    {% if posts.has_next %}
+    <div style="padding:20px;text-align:center;">
+        <a href="{{ url_for('main.explore', page=posts.next_num) }}" class="btn btn-outline">Load more</a>
+    </div>
+    {% endif %}
+{% else %}
+    <div class="empty-state">
+        <div class="icon">🌍</div>
+        <h3>Nothing to explore yet</h3>
+        <p>Be the first to post something!</p>
+    </div>
+{% endif %}
+{% endblock %}

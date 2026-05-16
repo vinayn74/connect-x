@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "posts/post_card.html" import render_post with context %}
+{% block title %}Home — Connect-X{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Home</h1>
+</div>
+
+<!-- Post Composer -->
+<form class="composer" method="POST" action="{{ url_for('posts.create_post') }}" enctype="multipart/form-data">
+    <img src="{% if current_user.avatar_url == 'default-avatar.png' %}{{ url_for('static', filename='images/default-avatar.png') }}{% else %}{{ url_for('static', filename='images/uploads/' + current_user.avatar_url) }}{% endif %}" alt="Avatar">
+    <div class="composer-body">
+        <textarea name="content" placeholder="What's happening?" maxlength="500"></textarea>
+        <div class="composer-actions">
+            <div class="composer-tools">
+                <button type="button" onclick="document.getElementById('image-upload').click()" title="Add image">📷</button>
+                <input type="file" id="image-upload" name="image" accept="image/*" style="display:none;">
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span class="char-count">0/500</span>
+                <button type="submit" class="btn btn-primary btn-sm">Post</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Posts Feed -->
+{% if posts.items %}
+    {% for post in posts.items %}
+        {{ render_post(post) }}
+    {% endfor %}
+    {% if posts.has_next %}
+    <div style="padding:20px;text-align:center;">
+        <a href="{{ url_for('main.feed', page=posts.next_num) }}" class="btn btn-outline">Load more</a>
+    </div>
+    {% endif %}
+{% else %}
+    <div class="empty-state">
+        <div class="icon">✨</div>
+        <h3>Your feed is empty</h3>
+        <p>Follow people to see their posts here, or write your first post!</p>
+    </div>
+{% endif %}
+{% endblock %}
